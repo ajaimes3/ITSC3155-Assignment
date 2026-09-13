@@ -45,17 +45,62 @@ class SandwichMachine:
 
     def check_resources(self, ingredients):
         """Returns True when order can be made, False if ingredients are insufficient."""
+        for item, amount in ingredients.items():
+            if resources[item] < amount:
+                print(f"Sorry there is not enough {item}.")
+                return False
+        return True
 
     def process_coins(self):
         """Returns the total calculated from coins inserted.
            Hint: include input() function here, e.g. input("how many quarters?: ")"""
+        print("Please insert coins.")
+        dollars = int(input("how many large dollars?: ")) * 1.00
+        half_dollars = int(input("how many half dollars?: ")) * 0.50
+        quarters = int(input("how many quarters?: ")) * 0.25
+        nickels = int(input("how many nickels?: ")) * 0.05
+
+        total = dollars + half_dollars + quarters + nickels
+        return total
 
     def transaction_result(self, coins, cost):
         """Return True when the payment is accepted, or False if money is insufficient.
            Hint: use the output of process_coins() function for cost input"""
+        if coins < cost:
+            print("Sorry that's not enough money. Money refunded.")
+            return False
+        else:
+            change = round(coins - cost, 2)
+            print(f"Here is ${change:.2f} in change.")
+            return True
 
     def make_sandwich(self, sandwich_size, order_ingredients):
-        """Deduct the required ingredients from the resources.
-           Hint: no output"""
+        """Deduct the required ingredients from the resources."""
+        for item, amount in order_ingredients.items():
+            self.machine_resources[item] -= amount
+        print(f"{sandwich_size} sandwich is ready. Bon appetit!")
 
 ### Make an instance of SandwichMachine class and write the rest of the codes ###
+machine = SandwichMachine(resources)
+
+is_on = True
+
+while is_on:
+    choice = input("What would you like? (small/medium/large/off/report): ").lower()
+
+    if choice == "off":
+        is_on = False
+    elif choice == "report":
+        print(f"Bread: {machine.machine_resources['bread']} slice(s)")
+        print(f"Ham: {machine.machine_resources['ham']} slice(s)")
+        print(f"Cheese: {machine.machine_resources['cheese']} pound(s)")
+    elif choice in recipes:
+        sandwich = recipes[choice]
+        # Step 2: Check resources
+        if machine.check_resources(sandwich["ingredients"]):
+            # Step 3: Process coins
+            payment = machine.process_coins()
+            # Step 4: Validate transaction
+            if machine.transaction_result(payment, sandwich["cost"]):
+                # Step 5: Make sandwich and deduct resources
+                machine.make_sandwich(choice, sandwich["ingredients"])
